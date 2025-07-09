@@ -1,0 +1,134 @@
+.layoutEditorModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modalContent {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 900px;
+}
+
+.gridAreaPreview {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.gridAreaBox {
+    flex: 1;
+    min-width: 200px;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    height: fit-content;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+
+.gridAreaBox h4 {
+    margin-bottom: 0.5rem;
+    text-transform: capitalize;
+    font-weight: bold;
+    font-size: 16px;
+    color: #222;
+}
+
+.droppableZone {
+    background: #f4f4f4;
+    padding: 0.5rem;
+    border-radius: 6px;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sectionItem {
+    background: #e9e9ff;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: grab;
+    transition: background 0.2s;
+}
+
+.sectionItem:hover {
+    background: #d7d7fa;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.modalButtons button {
+    padding: 0.5rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.modalButtons button:first-child {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.modalButtons button:first-child:hover {
+    background-color: #0056d2;
+    transform: scale(1.02);
+}
+
+.modalButtons button:last-child {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modalButtons button:last-child:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.02);
+}
+
+.unusedSections {
+    margin-top: 2rem;
+}
+
+.unusedSections h4 {
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.unusedSections button {
+    margin: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 13px;
+    cursor: pointer;
+    background: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.unusedSections button:hover {
+    background: #e2e2e2;
+}

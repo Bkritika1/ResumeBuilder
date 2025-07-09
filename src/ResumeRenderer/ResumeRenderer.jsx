@@ -16,10 +16,10 @@ import Organizations from "./components/Organizations";
 import "./ResumeRenderer.css";
 
 import { useResume } from "../context/ResumeContext";
-import templateStyles from "../data/templateStyle"; 
+import templateStyles from "../data/templateStyle";
 
 const sectionComponents = {
- personalInfo: PersonalInfo,
+    personalInfo: PersonalInfo,
     education: Education,
     workExperience: WorkExperience,
     skills: Skills,
@@ -35,73 +35,104 @@ const sectionComponents = {
 };
 
 export default function ResumeRenderer({ template }) {
-  const { data, style,setSelectedSection } = useResume();
+    const { data, style, customLayoutAreas, setSelectedSection, sectionOrder } = useResume();
 
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (!e.target.closest(".resumeSection")) {
+                setSelectedSection(null);
+            }
+        };
 
-useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (!e.target.closest(".resumeSection")) {
-      setSelectedSection(null);
-    }
-  };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
-  const { grid, fontFamily, fontSize, colorScheme } = template.layout;
+    const layout = {
+        ...style?.layout,
+        grid: {
+            ...style?.layout?.grid,
+            areas: customLayoutAreas || style?.layout?.grid?.areas || []
+        }
+    };
 
-  const templateId = String(template.id);
-  const templateStyle = templateStyles[templateId] || {}; 
-  const cssVariables = templateStyle.vars || {};         
+    const grid = layout.grid || { templateRows: "", templateColumns: "", rowGap: "", columnGap: "", areas: [] };
+    const fontFamily = layout.fontFamily || "sans-serif";
+    const fontSize = layout.fontSize || "12px";
+    const colorScheme = layout.colorScheme || { background: "#fff", text: "#000" };
 
-  const renderSection = (sectionName) => {
-    const SectionComponent = sectionComponents[sectionName];
-    return SectionComponent ? <SectionComponent /> : null;
-  };
+    const layoutAreas = customLayoutAreas || grid.areas || [];
 
-  const numRows = grid.templateRows.split(" ").length;
-  const numCols = grid.templateColumns.split(" ").length;
+    const templateId = style?.templateId || template?.id || "default";
+    const templateStyle = templateStyles[templateId] || {};
+    const cssVariables = templateStyle.vars || {};
 
-  const gridMatrix = Array.from({ length: numRows }, () =>
-    Array(numCols).fill(".")
-  );
+    const renderSection = (sectionName) => {
+        const SectionComponent = sectionComponents[sectionName];
+        if (!SectionComponent) {
+            console.warn("Unknown section:", sectionName);
+            return <div style={{ color: "red" }}>❌ {sectionName} not found</div>;
+        }
+        return <SectionComponent />;
+    };
 
-  grid.areas.forEach((area) => {
-    for (let row = area.rowStart - 1; row < area.rowEnd - 1; row++) {
-      for (let col = area.colStart - 1; col < area.colEnd - 1; col++) {
-        gridMatrix[row][col] = area.name;
-      }
-    }
-  });
+    const numRows = (grid.templateRows || "").split(" ").length;
+    const numCols = (grid.templateColumns || "").split(" ").length;
 
-  const gridTemplateAreas = gridMatrix.map((row) => `"${row.join(" ")}"`).join(" ");
+    const gridMatrix = Array.from({ length: numRows }, () =>
+        Array(numCols).fill(".")
+    );
 
-  return (
-    <div
-      id="resume-view"
-      style={{
-        fontFamily,
-        fontSize,
-        background: colorScheme.background,
-        color: colorScheme.text,
-        gridTemplateColumns: grid.templateColumns,
-        gridTemplateRows: grid.templateRows,
-        rowGap: grid.rowGap,
-        columnGap: grid.columnGap,
-        display: "grid",
-        gridTemplateAreas,
-        ...cssVariables, 
-      }}
-    >
-      {grid.areas.map((area, index) => (
-        <div key={index} style={{ gridArea: area.name }}>
-          {area.sections.map((section) => (
-            <div key={section}>{renderSection(section)}</div>
-          ))}
+    layoutAreas.forEach((area) => {
+        for (let row = area.rowStart - 1; row < area.rowEnd - 1; row++) {
+            for (let col = area.colStart - 1; col < area.colEnd - 1; col++) {
+                gridMatrix[row][col] = area.name;
+            }
+        }
+    });
+
+    const gridTemplateAreas = gridMatrix.map((row) => `"${row.join(" ")}"`).join(" ");
+
+    return (
+        <div
+            id="resume-view"
+            style={{
+                fontFamily,
+                fontSize,
+                background: colorScheme.background,
+                color: colorScheme.text,
+                gridTemplateColumns: grid.templateColumns,
+                gridTemplateRows: grid.templateRows,
+                rowGap: grid.rowGap,
+                columnGap: grid.columnGap,
+                display: "grid",
+                gridTemplateAreas,
+                ...cssVariables,
+            }}
+        >
+            {layoutAreas
+                .filter((area) => area.name !== "unused")
+                .map((area, index) => {
+                    const visibleOrderedSections = area.sections.filter((sec) =>
+                        sectionOrder.includes(sec)
+                    );
+
+                    const extraSections = area.sections.filter(
+                        (sec) => !visibleOrderedSections.includes(sec) && data[sec] !== undefined
+                    );
+
+                    const allSectionsToRender = [...visibleOrderedSections, ...extraSections];
+
+                    return (
+                        <div key={index} style={{ gridArea: area.name }}>
+                            {allSectionsToRender.map((section) => (
+                                <div key={section}>{renderSection(section)}</div>
+                            ))}
+                        </div>
+                    );
+                })}
         </div>
-      ))}
-    </div>
-  );
+    );
 }
